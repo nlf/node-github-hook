@@ -1,3 +1,8 @@
+/*
+ * (c) 2012 Nathan LaFreniere
+ * Licensed MIT, see LICENSE for more details
+ * */
+
 var express = require('express'),
     config = require('./config'),
     app = express.createServer();

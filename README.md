@@ -20,3 +20,8 @@ The config.js file is in the following format
     }
 
 You can configure as many URLs and repos as you want, and they'll be processed accordingly. Once your config.js is setup, just add the URL to your Post-Receive URLs in github and off you go!
+
+License
+=======
+
+MIT
