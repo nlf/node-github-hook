@@ -1,5 +1,6 @@
 /*
- * (c) 2012 Nathan LaFreniere
+ * Programmed by Nathan LaFreniere
+ * (c) 2012 &Yet
  * Licensed MIT, see LICENSE for more details
  * */
 
