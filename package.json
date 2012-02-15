@@ -1,5 +1,5 @@
 {
-    "name": "github-hook",
+    "name": "githubhook",
     "description": "a simple github post-receive hook",
     "author": "Nathan LaFreniere",
     "version": "0.2.0",
