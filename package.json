@@ -2,9 +2,9 @@
     "name": "github-hook",
     "description": "a simple github post-receive hook",
     "author": "Nathan LaFreniere",
-    "version": "0.1.0",
-    "main": "./server.js",
-    "repository": "git://github.com/nathan-lafreniere/node-github-hook.git",
+    "version": "0.2.0",
+    "main": "./index.js",
+    "repository": "git://github.com/andyet/node-github-hook.git",
     "dependencies": {
         "express": ""
     }
