@@ -4,7 +4,7 @@ node-github-hook
 This is a very simple, easy to use web hook for github. To use, install with npm and require it in a server process.
 
 ```javascript
-var githubhook = require('github-hook');
+var githubhook = require('githubhook');
 
 var thishook = githubhook(3000, 'supersecretpath', 'https://github.com/yourusername/yourrepo', function (err, payload) {
     if (!err) {
