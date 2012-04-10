@@ -1,7 +1,7 @@
 var githubhook = require('./'),
     http = require('http');
 
-var testHook = githubhook(8000, 'testPath', 'https://github.com/andyet/test', function (err, payload) {
+var testHook = githubhook(8123, { 'testPath': 'https://github.com/andyet/test' }, function (err, payload) {
     if (!err) {
         console.log(payload.repository.url);
     } else {
@@ -23,7 +23,7 @@ var testData = {
 
 var postOptions = {
     host: 'localhost',
-    port: 8000,
+    port: 8123,
     path: '/testPath',
     method: 'POST',
     headers: {
