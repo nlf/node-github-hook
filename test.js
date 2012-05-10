@@ -7,6 +7,8 @@ var testHook = githubhook(8123, { 'testPath': 'https://github.com/andyet/test' }
     } else {
         console.log(err);
     }
+
+    testHook.listener.close();
 });
 
 var testData = {
