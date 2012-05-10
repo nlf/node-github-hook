@@ -1,7 +1,7 @@
 node-github-hook
 ================
 
-This is a very simple, easy to use web hook for github. To use, install with npm and require it in a server process.
+This is a very simple, easy to use web hook for github. To use, install with npm (`githubhook`) and require it in a server process.
 
 ```javascript
 var githubhook = require('githubhook'),
