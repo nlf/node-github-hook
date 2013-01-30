@@ -12,6 +12,7 @@
         "__dirname",
         "exports",
         "console",
-        "module"
+        "module",
+        "Buffer"
     ]
 }

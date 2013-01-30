@@ -10,15 +10,13 @@ var testHook = githubhook(8123, { 'testPath': 'https://github.com/andyet/test' }
 });
 
 var testData = {
-    payload: {
-        pusher: { name: 'nathan-lafreniere', email: 'nlf@andyet.net' },
-        repository: { 
-            name: 'node-github-hook',
-            url: 'https://github.com/andyet/test',
-            owner: { name: 'nathan-lafreniere', email: 'nlf@andyet.net' }
-        },
-        ref: 'refs/heads/master'
-    }
+    pusher: { name: 'nathan-lafreniere', email: 'nlf@andyet.net' },
+    repository: { 
+        name: 'node-github-hook',
+        url: 'https://github.com/andyet/test',
+        owner: { name: 'nathan-lafreniere', email: 'nlf@andyet.net' }
+    },
+    ref: 'refs/heads/master'
 };
 
 var postOptions = {
@@ -40,4 +38,14 @@ var postReq = http.request(postOptions, function (res) {
 });
 
 postReq.write(JSON.stringify(testData), 'utf8');
+postReq.end();
+
+postOptions.headers['Content-Type'] = 'form/urlencoded';
+postReq = http.request(postOptions, function (res) {
+    res.setEncoding('utf8');
+    res.on('data', function (chunk) {
+        console.log('Response:', chunk);
+    });
+});
+postReq.write('payload=' + JSON.stringify(testData), 'utf8');
 postReq.end();
