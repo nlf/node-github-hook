@@ -10,11 +10,11 @@ var testHook = githubhook(8123, { 'testPath': 'https://github.com/andyet/test' }
 });
 
 var testData = {
-    pusher: { name: 'nathan-lafreniere', email: 'nlf@andyet.net' },
+    pusher: { name: 'nlf', email: 'nlf@andyet.net' },
     repository: { 
         name: 'node-github-hook',
         url: 'https://github.com/andyet/test',
-        owner: { name: 'nathan-lafreniere', email: 'nlf@andyet.net' }
+        owner: { name: 'nlf', email: 'nlf@andyet.net' }
     },
     ref: 'refs/heads/master'
 };
