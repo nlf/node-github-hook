@@ -27,7 +27,7 @@ github.on('reponame:ref', function (event, data) {
 
 Where 'event' is the event name to listen to (sent by github, typically 'push'), 'reponame' is the name of your repo (this one is node-github-hook), and 'ref' is the git reference (such as ref/heads/master)
 
-Configure a WebHook URL to whereever the server is listening, with a path of ```/github/callback``` (or ```/github/callback?secret=yoursecret'``` if you set a secret) and you're done!
+Configure a WebHook URL to whereever the server is listening, with a path of ```/github/callback``` (or ```/github/callback?secret=yoursecret``` if you set a secret) and you're done!
 
 Available options are:
 
