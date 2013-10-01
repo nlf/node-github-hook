@@ -1,7 +1,16 @@
 node-github-hook
 ================
 
-This is a very simple, easy to use evented web hook for github. To use:
+This is a very simple, easy to use evented web hook for github.
+
+To Install:
+-----------
+```
+npm install githubhook
+```
+
+To Use:
+-------
 
 ```javascript
 var githubhook = require('githubhook');
