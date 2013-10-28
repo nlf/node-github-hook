@@ -64,6 +64,10 @@ function serverHandler(req, res) {
             self.logger.error(Util.format('[GithubHook] received invalid data from %s, returning 400', remoteAddress));
             return reply(400, res);
         }
+        if (!data.repository || !data.repository.name) {
+            self.logger.error(Util.format('[GithubHook] received incomplete data from %s, returning 400', remoteAddress));
+            return reply(400, res);
+        }
 
         var event = req.headers['x-github-event'];
         var repo = data.repository.name;
