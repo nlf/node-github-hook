@@ -41,7 +41,7 @@ Configure a WebHook URL to whereever the server is listening, with a path of ```
 Available options are:
 
 * host: the host to listen on, defaults to '0.0.0.0'
-* port: the port to listen on, defaults to 3240
+* port: the port to listen on, defaults to 3420
 * secret: an optional secret to require in callbacks as a query parameter, default is to not use a secret
 * logger: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is to not log. mostly only for debugging purposes.
 
