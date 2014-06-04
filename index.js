@@ -5,28 +5,29 @@ var EventEmitter = require('events').EventEmitter;
 var Util = require('util');
 var Crypto = require('crypto');
 
-var GithubHook = function (options) {
-    if (!(this instanceof GithubHook)) return new GithubHook(options);
-    options = options || {};
-    this.port = options.port || 3420;
-    this.host = options.host || '0.0.0.0';
-    this.secret = options.secret || false;
-    this.logger = options.logger || { log: function () {}, error: function () {} };
+function reply(statusCode, res) {
+    var message = { message: Http.STATUS_CODES[statusCode].toLowerCase() };
+    message.result = statusCode >= 400 ? 'error' : 'ok';
+    message = JSON.stringify(message);
 
-    this.server = Http.createServer(serverHandler.bind(this));
-    EventEmitter.call(this);
-};
+    var headers = {
+        'Content-Type': 'application/json',
+        'Content-Length': message.length
+    };
 
-Util.inherits(GithubHook, EventEmitter);
+    res.writeHead(statusCode, headers);
+    res.end(message);
+}
 
-GithubHook.prototype.listen = function (callback) {
-    var self = this;
-
-    self.server.listen(self.port, self.host, function () {
-        self.logger.log(Util.format('[GithubHook] listening for github events on %s:%d', self.host, self.port));
-        if (typeof callback === 'function') callback();
-    });
-};
+function parse(data) {
+    var result;
+    try {
+        result = JSON.parse(data);
+    } catch (e) {
+        result = false;
+    }
+    return result;
+}
 
 function serverHandler(req, res) {
     var self = this;
@@ -38,13 +39,21 @@ function serverHandler(req, res) {
     var remoteAddress = req.ip || req.socket.remoteAddress || req.socket.socket.remoteAddress;
 
     req.on('data', function (chunk) {
-        if (failed) return;
+
+        if (failed) {
+            return;
+        }
+
         buffer.push(chunk);
         bufferLength += chunk.length;
     });
 
     req.on('end', function (chunk) {
-        if (failed) return;
+
+        if (failed) {
+            return;
+        }
+
         var data;
 
         if (chunk) {
@@ -55,7 +64,9 @@ function serverHandler(req, res) {
 
         self.logger.log(Util.format('[GithubHook] received %d bytes from %s', bufferLength, remoteAddress));
 
-        if (req.headers['content-type'] === 'application/x-www-form-urlencoded') isForm = true;
+        if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+            isForm = true;
+        }
 
         data = Buffer.concat(buffer, bufferLength).toString();
 
@@ -77,7 +88,9 @@ function serverHandler(req, res) {
             }
         }
 
-        if (isForm) data = Querystring.parse(data).payload;
+        if (isForm) {
+            data = Querystring.parse(data).payload;
+        }
         data = parse(data);
 
         // invalid json
@@ -130,28 +143,36 @@ function serverHandler(req, res) {
     }
 }
 
-function reply(statusCode, res) {
-    var message = { message: Http.STATUS_CODES[statusCode].toLowerCase() };
-    message.result = statusCode >= 400 ? 'error' : 'ok';
-    message = JSON.stringify(message);
+var GithubHook = function (options) {
 
-    var headers = {
-        'Content-Type': 'application/json',
-        'Content-Length': message.length
-    };
-
-    res.writeHead(statusCode, headers);
-    res.end(message);
-}
-
-function parse(data) {
-    var result;
-    try {
-        result = JSON.parse(data);
-    } catch (e) {
-        result = false;
+    if (!(this instanceof GithubHook)) {
+        return new GithubHook(options);
     }
-    return result;
-}
+
+    options = options || {};
+    this.port = options.port || 3420;
+    this.host = options.host || '0.0.0.0';
+    this.secret = options.secret || false;
+    this.logger = options.logger || { log: function () {}, error: function () {} };
+
+    this.server = Http.createServer(serverHandler.bind(this));
+    EventEmitter.call(this);
+};
+
+Util.inherits(GithubHook, EventEmitter);
+
+GithubHook.prototype.listen = function (callback) {
+    var self = this;
+
+    self.server.listen(self.port, self.host, function () {
+
+        self.logger.log(Util.format('[GithubHook] listening for github events on %s:%d', self.host, self.port));
+
+        if (typeof callback === 'function') {
+            callback();
+        }
+    });
+};
+
 
 module.exports = GithubHook;

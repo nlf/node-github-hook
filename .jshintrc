@@ -1,18 +1,10 @@
 {
-    "asi": false,
-    "expr": true,
-    "loopfunc": true,
-    "curly": false,
-    "evil": true,
-    "white": true,
-    "undef": true,
-    "browser": true,
-    "predef": [
-        "require",
-        "__dirname",
-        "exports",
-        "console",
-        "module",
-        "Buffer"
-    ]
+  "node": true,
+
+  "curly": true,
+  "latedef": true,
+  "quotmark": true,
+  "undef": true,
+  "unused": true,
+  "trailing": true
 }
