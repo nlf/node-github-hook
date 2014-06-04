@@ -75,6 +75,7 @@ function serverHandler(req, res) {
 
         // and now we emit a bunch of data
         self.logger.log(Util.format('[GithubHook] got %s event on %s:%s from %s', event, repo, ref, remoteAddress));
+        self.emit('*', event, repo, ref, data);
         self.emit(repo, event, ref, data);
         self.emit(repo + ':' + ref, event, data);
         self.emit(event, repo, ref, data);

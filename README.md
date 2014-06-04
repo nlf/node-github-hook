@@ -18,6 +18,9 @@ var github = githubhook({/* options */});
 
 github.listen();
 
+github.on('*', function (event, repo, ref, data) {
+});
+
 github.on('event', function (repo, ref, data) {
 });
 
