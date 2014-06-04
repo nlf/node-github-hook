@@ -6,6 +6,7 @@ var Util = require('util');
 var Crypto = require('crypto');
 
 function reply(statusCode, res) {
+
     var message = { message: Http.STATUS_CODES[statusCode].toLowerCase() };
     message.result = statusCode >= 400 ? 'error' : 'ok';
     message = JSON.stringify(message);
@@ -20,6 +21,7 @@ function reply(statusCode, res) {
 }
 
 function parse(data) {
+
     var result;
     try {
         result = JSON.parse(data);
@@ -30,6 +32,7 @@ function parse(data) {
 }
 
 function serverHandler(req, res) {
+
     var self = this;
     var url = Url.parse(req.url, true);
     var buffer = [];
@@ -162,6 +165,7 @@ var GithubHook = function (options) {
 Util.inherits(GithubHook, EventEmitter);
 
 GithubHook.prototype.listen = function (callback) {
+
     var self = this;
 
     self.server.listen(self.port, self.host, function () {
