@@ -3,6 +3,7 @@ var Url = require('url');
 var Querystring = require('querystring');
 var EventEmitter = require('events').EventEmitter;
 var Util = require('util');
+var Crypto = require('crypto');
 
 var GithubHook = function (options) {
     if (!(this instanceof GithubHook)) return new GithubHook(options);
@@ -51,11 +52,31 @@ function serverHandler(req, res) {
             bufferLength += chunk.length;
         }
 
+
         self.logger.log(Util.format('[GithubHook] received %d bytes from %s', bufferLength, remoteAddress));
 
         if (req.headers['content-type'] === 'application/x-www-form-urlencoded') isForm = true;
 
         data = Buffer.concat(buffer, bufferLength).toString();
+
+        // if a secret is configured, make sure the received signature is correct
+        if (self.secret) {
+            var signature = req.headers['x-hub-signature'];
+
+            if (!signature) {
+                self.logger.error('[GithubHook] secret configured, but missing signature, returning 403');
+                return reply(403, res);
+            }
+
+            signature = signature.replace(/^sha1=/, '');
+            var digest = Crypto.createHmac('sha1', self.secret).update(data).digest('hex');
+
+            if (signature !== digest) {
+                self.logger.error('[GithubHook] got invalid signature, returning 403');
+                return reply(403, res);
+            }
+        }
+
         if (isForm) data = Querystring.parse(data).payload;
         data = parse(data);
 
@@ -106,13 +127,6 @@ function serverHandler(req, res) {
         self.logger.error(Util.format('[GithubHook] missing x-github-event header from %s, returning 400', remoteAddress));
         failed = true;
         return reply(400, res);
-    }
-
-    // if a secret is configured, check it and 403 if it's wrong
-    if (self.secret && url.query.secret !== self.secret) {
-        self.logger.error(Util.format('[GithubHook] got invalid secret from %s, returning 403', remoteAddress));
-        failed = true;
-        return reply(403, res);
     }
 }
 
