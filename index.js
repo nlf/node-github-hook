@@ -125,7 +125,7 @@ function serverHandler(req, res) {
     self.logger.log(Util.format('[GithubHook]', req.method, req.url, remoteAddress));
 
     // 404 if the path is wrong
-    if (url.pathname !== '/github/callback') {
+    if (url.pathname !== self.path) {
         self.logger.error(Util.format('[GithubHook] got invalid path from %s, returning 404', remoteAddress));
         failed = true;
         return reply(404, res);
@@ -157,6 +157,7 @@ var GithubHook = function (options) {
     this.host = options.host || '0.0.0.0';
     this.secret = options.secret || false;
     this.logger = options.logger || { log: function () {}, error: function () {} };
+    this.path = options.path || '/github/callback';
 
     this.server = Http.createServer(serverHandler.bind(this));
     EventEmitter.call(this);
