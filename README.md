@@ -48,6 +48,7 @@ Available options are:
 * path: the path for the github callback, defaults to '/github/callback'
 * secret: if specified, you must use the same secret in your webhook configuration in github. if a secret is specified, but one is not configured in github, the hook will fail. if a secret is *not* specified, but one *is* configured in github, the signature will not be validated and will be assumed to be correct. consider yourself warned.
 * logger: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is to not log. mostly only for debugging purposes.
+* prefix: an optional prefix function used to prefix log messages, default is `'[GithubHhook]'`. requires logger option to be set. useful if you want to prepend extra information, such as datestamp etc.
 
 License
 =======
