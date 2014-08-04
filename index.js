@@ -3,6 +3,7 @@ var Url = require('url');
 var Querystring = require('querystring');
 var EventEmitter = require('events').EventEmitter;
 var Util = require('util');
+var format = Util.format;
 var Crypto = require('crypto');
 
 function reply(statusCode, res) {
@@ -65,7 +66,7 @@ function serverHandler(req, res) {
         }
 
 
-        self.logger.log(Util.format('received %d bytes from %s', bufferLength, remoteAddress));
+        self.logger.log(format('received %d bytes from %s', bufferLength, remoteAddress));
 
         if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
             isForm = true;
@@ -98,11 +99,11 @@ function serverHandler(req, res) {
 
         // invalid json
         if (!data) {
-            self.logger.error(Util.format('received invalid data from %s, returning 400', remoteAddress));
+            self.logger.error(format('received invalid data from %s, returning 400', remoteAddress));
             return reply(400, res);
         }
         if (!data.repository || !data.repository.name) {
-            self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
+            self.logger.error(format('received incomplete data from %s, returning 400', remoteAddress));
             return reply(400, res);
         }
 
@@ -111,7 +112,12 @@ function serverHandler(req, res) {
         var ref = data.ref;
 
         // and now we emit a bunch of data
-        self.logger.log(Util.format('got %s event on %s:%s from %s', event, repo, ref, remoteAddress));
+        if (ref) {
+            self.logger.log(format('got %s event on %s:%s from %s', event, repo, ref, remoteAddress));
+        }
+        else {
+            self.logger.log(format('got %s event on %s from %s', event, repo, remoteAddress));
+        }
         self.emit('*', event, repo, ref, data);
         self.emit(repo, event, ref, data);
         self.emit(repo + ':' + ref, event, data);
@@ -122,25 +128,25 @@ function serverHandler(req, res) {
         reply(200, res);
     });
 
-    self.logger.log(Util.format(req.method, req.url, remoteAddress));
+    self.logger.log(format(req.method, req.url, remoteAddress));
 
     // 404 if the path is wrong
     if (url.pathname !== self.path) {
-        self.logger.error(Util.format('got invalid path from %s, returning 404', remoteAddress));
+        self.logger.error(format('got invalid path from %s, returning 404', remoteAddress));
         failed = true;
         return reply(404, res);
     }
 
     // 405 if the method is wrong
     if (req.method !== 'POST') {
-        self.logger.error(Util.format('got invalid method from %s, returning 405', remoteAddress));
+        self.logger.error(format('got invalid method from %s, returning 405', remoteAddress));
         failed = true;
         return reply(405, res);
     }
 
     // 400 if it's not a github event
     if (!req.headers.hasOwnProperty('x-github-event')) {
-        self.logger.error(Util.format('missing x-github-event header from %s, returning 400', remoteAddress));
+        self.logger.error(format('missing x-github-event header from %s, returning 400', remoteAddress));
         failed = true;
         return reply(400, res);
     }
@@ -171,7 +177,7 @@ GithubHook.prototype.listen = function (callback) {
 
     self.server.listen(self.port, self.host, function () {
 
-        self.logger.log(Util.format('listening for github events on %s:%d', self.host, self.port));
+        self.logger.log(format('listening for github events on %s:%d', self.host, self.port));
 
         if (typeof callback === 'function') {
             callback();
