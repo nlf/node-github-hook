@@ -69,25 +69,12 @@ function serverHandler(req, res) {
 
         if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
             isForm = true;
+            data = Buffer.concat(buffer, bufferLength).toString();
+        } else {
+            //this is already a string when sent as JSON
+            data = Buffer.concat(buffer, bufferLength);
         }
-
-        data = Buffer.concat(buffer, bufferLength).toString();
-
-        if (isForm) {
-            data = Querystring.parse(data).payload;
-        }
-        data = parse(data);
-
-        // invalid json
-        if (!data) {
-            self.logger.error(Util.format('received invalid data from %s, returning 400', remoteAddress));
-            return reply(400, res);
-        }
-        if (!data.repository || !data.repository.name) {
-            self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
-            return reply(400, res);
-        }
-
+        
         // if a secret is configured, make sure the received signature is correct
         if (self.secret) {
             var signature = req.headers['x-hub-signature'];
@@ -106,6 +93,20 @@ function serverHandler(req, res) {
             }
         }
 
+        if (isForm) {
+            data = Querystring.parse(data).payload;
+        }
+        data = parse(data);
+
+        // invalid json
+        if (!data) {
+            self.logger.error(Util.format('received invalid data from %s, returning 400', remoteAddress));
+            return reply(400, res);
+        }
+        if (!data.repository || !data.repository.name) {
+            self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
+            return reply(400, res);
+        }
 
         var event = req.headers['x-github-event'];
         var repo = data.repository.name;
