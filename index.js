@@ -69,10 +69,11 @@ function serverHandler(req, res) {
 
         if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
             isForm = true;
+            data = Buffer.concat(buffer, bufferLength).toString();
+        } else {
+            //this is already a string when sent as JSON
+            data = Buffer.concat(buffer, bufferLength);
         }
-
-        data = Buffer.concat(buffer, bufferLength);
-
         // if a secret is configured, make sure the received signature is correct
         if (self.secret) {
             var signature = req.headers['x-hub-signature'];
