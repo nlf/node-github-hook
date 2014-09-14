@@ -71,7 +71,7 @@ function serverHandler(req, res) {
             isForm = true;
         }
 
-        data = buffer.concat(buffer, bufferLength).toString();
+        data = Buffer.concat(buffer, bufferLength).toJSON();
 
         // if a secret is configured, make sure the received signature is correct
         if (self.secret) {
