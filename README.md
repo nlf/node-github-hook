@@ -54,6 +54,9 @@ Available options are:
 Command-line
 -------------
 
+You can use the command-line client to execute a shell script when a particular 
+event occurs.
+
 Install it globally:
 
 ```bash
@@ -80,6 +83,12 @@ Options:
 ```
 
 Default values for options are same as for the API (see above).
+
+Example usage:
+
+```bash
+$ githubhook push:node-github-hook ./some_script.sh
+```
 
 
 License
