@@ -1,0 +1,67 @@
+#!/usr/bin/env node
+
+var child_process = require('child_process'),
+  docopt = require('docopt'),
+  multiline = require('multiline'),
+  path = require('path');
+
+var githubhook = require('../');
+
+
+var doc = multiline(function() {/*
+
+Usage:
+  githubhook [--host=HOST] [--port=PORT] [--callback=URL_PATH] [--secret=SECRET] [--verbose] <trigger> <script>
+
+Options:
+
+  --host=HOST             Address to listen on
+  --port=PORT             Port to listen on
+  --callback=URL_PATH     The callback URL path
+  --secret=SECRET         The secret you use the in the Github webhook config
+  --verbose                 Log to console
+  --version                 Output the version number
+  -h, --help                Output usage information
+
+*/});
+
+
+var options = docopt.docopt(doc, {
+  version: require('../package.json').version,
+  help: true,
+  options_first: false,
+  exit: true
+});
+
+
+var github = githubhook({
+  host: options['--host'],
+  port: options['--port'] ? parseInt(options['--port']) : null,
+  path: options['--callback'],
+  secret: options['--secret'],
+  logger: options['--verbose'] ? console : null,
+});
+
+// start it!
+github.listen();
+
+// trigger
+github.on(options['<trigger>'], function () {
+  var scriptPath = path.resolve(options['<script>']);
+
+  child_process.execFile(scriptPath, function(err, stdout, stderr) {
+    if (options['--verbose']) {
+      console.log('--> EXEC ' + scriptPath);
+
+      if (err) {
+        console.error(err.stack);
+      } else {
+        console.error(stderr);
+        console.log(stdout);
+      }
+
+      console.log('--- END ' + scriptPath);
+    }
+  });
+});
+

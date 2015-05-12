@@ -1,7 +1,8 @@
 node-github-hook
 ================
 
-This is a very simple, easy to use evented web hook for github.
+This is a very simple, easy to use evented web hook API for github. A command-line executable 
+is also available.
 
 To Install:
 -----------
@@ -48,6 +49,47 @@ Available options are:
 * path: the path for the github callback, defaults to '/github/callback'
 * secret: if specified, you must use the same secret in your webhook configuration in github. if a secret is specified, but one is not configured in github, the hook will fail. if a secret is *not* specified, but one *is* configured in github, the signature will not be validated and will be assumed to be correct. consider yourself warned.
 * logger: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is to not log. mostly only for debugging purposes.
+
+
+Command-line
+-------------
+
+You can use the command-line client to execute a shell script when a particular 
+event occurs.
+
+Install it globally:
+
+```bash
+$ npm install -g node-github-hook
+```
+
+Then you can run `githubhook`:
+
+```bash
+$ githubhook --help
+
+Usage:
+  githubhook [--host=HOST] [--port=PORT] [--callback=URL_PATH] [--secret=SECRET] [--verbose] <trigger> <script>
+
+Options:
+
+  --host=HOST             Address to listen on
+  --port=PORT             Port to listen on
+  --callback=URL_PATH     The callback URL path
+  --secret=SECRET         The secret you use the in the Github webhook config
+  --verbose               Log to console
+  --version               Output the version number
+  -h, --help              Output usage information
+```
+
+Default values for options are same as for the API (see above).
+
+Example usage:
+
+```bash
+$ githubhook push:node-github-hook ./some_script.sh
+```
+
 
 License
 =======
