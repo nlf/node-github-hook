@@ -108,7 +108,7 @@ function serverHandler(req, res) {
             return reply(400, res);
         }
 
-        var event = req.headers['x-github-event'];
+        var event = req.headers['x-github-event'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
         var repo = data.repository.name;
         var ref = data.ref;
 

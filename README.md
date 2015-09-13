@@ -1,8 +1,7 @@
 node-github-hook
 ================
 
-This is a very simple, easy to use evented web hook API for github. A command-line executable 
-is also available.
+This is a very simple, easy to use evented web hook API for github or gitlab. A command-line executable is also available.
 
 To Install:
 -----------
@@ -40,7 +39,7 @@ github.on('reponame:ref', function (event, data) {
 
 Where 'event' is the event name to listen to (sent by github, typically 'push'), 'reponame' is the name of your repo (this one is node-github-hook), and 'ref' is the git reference (such as ref/heads/master)
 
-Configure a WebHook URL to whereever the server is listening, with a path of ```/github/callback``` (or ```/github/callback?secret=yoursecret``` if you set a secret) and you're done!
+Configure a WebHook URL to whereever the server is listening, with a path of ```/github/callback``` and you're done!
 
 Available options are:
 
@@ -48,7 +47,7 @@ Available options are:
 * port: the port to listen on, defaults to 3420
 * path: the path for the github callback, defaults to '/github/callback'
 * secret: if specified, you must use the same secret in your webhook configuration in github. if a secret is specified, but one is not configured in github, the hook will fail. if a secret is *not* specified, but one *is* configured in github, the signature will not be validated and will be assumed to be correct. consider yourself warned.
-* logger: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is to not log. mostly only for debugging purposes.
+* logger: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is `console`.
 
 
 Command-line
