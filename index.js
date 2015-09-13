@@ -163,7 +163,7 @@ var GithubHook = function (options) {
     this.port = options.port || 3420;
     this.host = options.host || '0.0.0.0';
     this.secret = options.secret || false;
-    this.logger = options.logger || { log: function () {}, error: function () {} };
+    this.logger = options.logger || console;
     this.path = options.path || '/github/callback';
 
     this.server = Http.createServer(serverHandler.bind(this));
