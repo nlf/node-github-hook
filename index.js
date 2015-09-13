@@ -187,4 +187,20 @@ GithubHook.prototype.listen = function (callback) {
 };
 
 
+GithubHook.prototype.stop = function (callback) {
+
+    var self = this;
+
+    self.server.close(function () {
+
+        self.logger.log('stopped listening for github events');
+        self.server = Http.createServer(serverHandler.bind(this));
+
+        if (typeof callback === 'function') {
+            callback();
+        }
+    });
+};
+
+
 module.exports = GithubHook;

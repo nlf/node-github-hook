@@ -35,6 +35,9 @@ github.on('reponame', function (event, ref, data) {
 
 github.on('reponame:ref', function (event, data) {
 });
+
+// if you'd like to programmatically stop listening
+// github.stop();
 ```
 
 Where 'event' is the event name to listen to (sent by github, typically 'push'), 'reponame' is the name of your repo (this one is node-github-hook), and 'ref' is the git reference (such as ref/heads/master)
