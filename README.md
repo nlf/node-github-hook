@@ -62,7 +62,7 @@ event occurs.
 Install it globally:
 
 ```bash
-$ npm install -g node-github-hook
+$ npm install -g githubhook
 ```
 
 Then you can run `githubhook`:
