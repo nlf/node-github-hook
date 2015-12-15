@@ -1,7 +1,7 @@
 node-github-hook
 ================
 
-This is a very simple, easy to use evented web hook API for github or gitlab. A command-line executable is also available.
+This is a very simple, easy to use evented web hook API for GitHub or GitLab. A command-line executable is also available.
 
 To Install:
 -----------
