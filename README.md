@@ -1,7 +1,7 @@
 node-github-hook
 ================
 
-This is a very simple, easy to use evented web hook API for github or gitlab. A command-line executable is also available.
+This is a very simple, easy to use evented web hook API for GitHub or GitLab. A command-line executable is also available.
 
 To Install:
 -----------
@@ -40,7 +40,7 @@ github.on('reponame:ref', function (event, data) {
 // github.stop();
 ```
 
-Where 'event' is the event name to listen to (sent by github, typically 'push'), 'reponame' is the name of your repo (this one is node-github-hook), and 'ref' is the git reference (such as ref/heads/master)
+Where 'event' is the event name to listen to (sent by GitHub, typically 'push'), 'reponame' is the name of your repo (this one is node-github-hook), and 'ref' is the git reference (such as ref/heads/master)
 
 Configure a WebHook URL to whereever the server is listening, with a path of ```/github/callback``` and you're done!
 
@@ -48,8 +48,8 @@ Available options are:
 
 * host: the host to listen on, defaults to '0.0.0.0'
 * port: the port to listen on, defaults to 3420
-* path: the path for the github callback, defaults to '/github/callback'
-* secret: if specified, you must use the same secret in your webhook configuration in github. if a secret is specified, but one is not configured in github, the hook will fail. if a secret is *not* specified, but one *is* configured in github, the signature will not be validated and will be assumed to be correct. consider yourself warned.
+* path: the path for the GitHub callback, defaults to '/github/callback'
+* secret: if specified, you must use the same secret in your webhook configuration in GitHub. if a secret is specified, but one is not configured in GitHub, the hook will fail. if a secret is *not* specified, but one *is* configured in GitHub, the signature will not be validated and will be assumed to be correct. consider yourself warned.
 * logger: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is `console`.
 
 
@@ -78,7 +78,7 @@ Options:
   --host=HOST             Address to listen on
   --port=PORT             Port to listen on
   --callback=URL_PATH     The callback URL path
-  --secret=SECRET         The secret you use the in the Github webhook config
+  --secret=SECRET         The secret you use the in the GitHub webhook config
   --verbose               Log to console
   --version               Output the version number
   -h, --help              Output usage information
