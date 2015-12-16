@@ -165,9 +165,9 @@ function serverHandler(req, res) {
         return reply(405, res);
     }
 
-    // 400 if it's not a github event
-    if (!req.headers.hasOwnProperty('x-github-event')) {
-        self.logger.error(Util.format('missing x-github-event header from %s, returning 400', remoteAddress));
+    // 400 if it's not a github or gitlab event
+    if (!req.headers.hasOwnProperty('x-github-event') && !req.headers.hasOwnProperty('x-gitlab-event')) {
+        self.logger.error(Util.format('missing x-github-event or x-gitlab-event header from %s, returning 400', remoteAddress));
         failed = true;
         return reply(400, res);
     }
