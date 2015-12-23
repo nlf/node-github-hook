@@ -98,33 +98,53 @@ function serverHandler(req, res) {
         }
         data = parse(data);
 
+        var event = req.headers['x-github-event'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
+
         // invalid json
         if (!data) {
             self.logger.error(Util.format('received invalid data from %s, returning 400', remoteAddress));
             return reply(400, res);
         }
-        if (!data.repository || !data.repository.name) {
-            self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
-            return reply(400, res);
-        }
 
-        var event = req.headers['x-github-event'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
-        var repo = data.repository.name;
-        var ref = data.ref;
+        // handle GitLab system hook
+        if (event !== 'system'){
+            // invalid json
+            if (!data.repository || !data.repository.name) {
+                self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
+                return reply(400, res);
+            }
 
-        // and now we emit a bunch of data
-        if (ref) {
-            self.logger.log(Util.format('got %s event on %s:%s from %s', event, repo, ref, remoteAddress));
+            var repo = data.repository.name;
+            var ref = data.ref;
+
+            // and now we emit a bunch of data
+            if (ref) {
+                self.logger.log(Util.format('got %s event on %s:%s from %s', event, repo, ref, remoteAddress));
+            }
+            else {
+                self.logger.log(Util.format('got %s event on %s from %s', event, repo, remoteAddress));
+            }
+            self.emit('*', event, repo, ref, data);
+            self.emit(repo, event, ref, data);
+            self.emit(repo + ':' + ref, event, data);
+            self.emit(event, repo, ref, data);
+            self.emit(event + ':' + repo, ref, data);
+            self.emit(event + ':' + repo + ':' + ref, data);
+        } else {
+            var type = data.event_name;
+
+            // invalid json
+            if (!type) {
+                self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
+                return reply(400, res);
+            }
+
+            self.logger.log(Util.format('got %s event of type %s from %s', event, type, remoteAddress));
+
+            // and now we emit a bunch of data
+            self.emit('*', event, type, data);
+            self.emit(type, event, data);
         }
-        else {
-            self.logger.log(Util.format('got %s event on %s from %s', event, repo, remoteAddress));
-        }
-        self.emit('*', event, repo, ref, data);
-        self.emit(repo, event, ref, data);
-        self.emit(repo + ':' + ref, event, data);
-        self.emit(event, repo, ref, data);
-        self.emit(event + ':' + repo, ref, data);
-        self.emit(event + ':' + repo + ':' + ref, data);
 
         reply(200, res);
     });
@@ -145,9 +165,9 @@ function serverHandler(req, res) {
         return reply(405, res);
     }
 
-    // 400 if it's not a github event
-    if (!req.headers.hasOwnProperty('x-github-event')) {
-        self.logger.error(Util.format('missing x-github-event header from %s, returning 400', remoteAddress));
+    // 400 if it's not a github or gitlab event
+    if (!req.headers.hasOwnProperty('x-github-event') && !req.headers.hasOwnProperty('x-gitlab-event')) {
+        self.logger.error(Util.format('missing x-github-event or x-gitlab-event header from %s, returning 400', remoteAddress));
         failed = true;
         return reply(400, res);
     }
