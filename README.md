@@ -53,11 +53,11 @@ Configure a WebHook URL to whereever the server is listening, with a path of ```
 
 Available options are:
 
-* host: the host to listen on, defaults to '0.0.0.0'
-* port: the port to listen on, defaults to 3420
-* path: the path for the GitHub callback, defaults to '/github/callback'
-* secret: if specified, you must use the same secret in your webhook configuration in GitHub. if a secret is specified, but one is not configured in GitHub, the hook will fail. if a secret is *not* specified, but one *is* configured in GitHub, the signature will not be validated and will be assumed to be correct. consider yourself warned.
-* logger: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is `console`.
+* **host**: the host to listen on, defaults to '0.0.0.0'
+* **port**: the port to listen on, defaults to 3420
+* **path**: the path for the GitHub callback, defaults to '/github/callback'
+* **secret**: If specified, you must use the same secret in your webhook configuration in GitHub. if a secret is specified, but one is not configured in GitHub, the hook will fail. If a secret is *not* specified, but one *is* configured in GitHub, the signature will not be validated and will be assumed to be correct. Consider yourself warned.
+* **logger**: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is `console`
 
 
 Command-line
