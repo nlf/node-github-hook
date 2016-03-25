@@ -56,7 +56,9 @@ Available options are:
 * host: the host to listen on, defaults to '0.0.0.0'
 * port: the port to listen on, defaults to 3420
 * path: the path for the GitHub callback, defaults to '/github/callback'
+* wildcard: if true, the path for the GitHub callback will be considered valid as long as it *starts* with the configured path
 * secret: if specified, you must use the same secret in your webhook configuration in GitHub. if a secret is specified, but one is not configured in GitHub, the hook will fail. if a secret is *not* specified, but one *is* configured in GitHub, the signature will not be validated and will be assumed to be correct. consider yourself warned.
+* secret: can also be a function that takes the following parameters: (request object, data, callback). Callback is error first and should be passed (err, secret)
 * logger: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is `console`.
 
 
