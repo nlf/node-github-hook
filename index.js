@@ -37,7 +37,6 @@ function serverHandler(req, res) {
     var url = Url.parse(req.url, true);
     var buffer = [];
     var bufferLength = 0;
-    var isForm = false;
     var failed = false;
     var remoteAddress = req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress || req.socket.socket.remoteAddress;
 
@@ -68,91 +67,96 @@ function serverHandler(req, res) {
         self.logger.log(Util.format('received %d bytes from %s', bufferLength, remoteAddress));
 
         if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
-            isForm = true;
             data = Buffer.concat(buffer, bufferLength).toString();
         } else {
             //this is already a string when sent as JSON
             data = Buffer.concat(buffer, bufferLength);
         }
-        
-        // if a secret is configured, make sure the received signature is correct
-        if (self.secret) {
+
+        self.getSecret(req, function (err, secret) {
+            if (err) {
+                this.logger.error('error getting secret for' +  res.url + 'returning 403');
+                return reply(403, res);
+            }
             var signature = req.headers['x-hub-signature'];
+            if (secret) {
 
-            if (!signature) {
-                self.logger.error('secret configured, but missing signature, returning 403');
-                return reply(403, res);
+                if (!signature) {
+                    this.logger.error('secret configured, but missing signature, returning 403');
+                    return reply(403, res);
+                }
+
+                signature = signature.replace(/^sha1=/, '');
+                var digest = Crypto.createHmac('sha1', this.secret).update(data).digest('hex');
+
+                if (signature !== digest) {
+                    this.logger.error('got invalid signature, returning 403');
+                    return reply(403, res);
+                }
             }
 
-            signature = signature.replace(/^sha1=/, '');
-            var digest = Crypto.createHmac('sha1', self.secret).update(data).digest('hex');
-
-            if (signature !== digest) {
-                self.logger.error('got invalid signature, returning 403');
-                return reply(403, res);
+            if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+                data = Querystring.parse(data).payload;
             }
-        }
+            data = parse(data);
 
-        if (isForm) {
-            data = Querystring.parse(data).payload;
-        }
-        data = parse(data);
 
-        var event = req.headers['x-github-event'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
-
-        // invalid json
-        if (!data) {
-            self.logger.error(Util.format('received invalid data from %s, returning 400', remoteAddress));
-            return reply(400, res);
-        }
-
-        // handle GitLab system hook
-        if (event !== 'system'){
             // invalid json
-            if (!data.repository || !data.repository.name) {
-                self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
+            if (!data) {
+                self.logger.error(Util.format('received invalid data from %s, returning 400', remoteAddress));
                 return reply(400, res);
             }
 
-            var repo = data.repository.name;
-            var ref = data.ref;
+            var event = req.headers['x-github-event'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
 
-            // and now we emit a bunch of data
-            if (ref) {
-                self.logger.log(Util.format('got %s event on %s:%s from %s', event, repo, ref, remoteAddress));
+            // handle GitLab system hook
+            if (event !== 'system'){
+                // invalid json
+                if (!data.repository || !data.repository.name) {
+                    self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
+                    return reply(400, res);
+                }
+
+                var repo = data.repository.name;
+                var ref = data.ref;
+
+                // and now we emit a bunch of data
+                if (ref) {
+                    self.logger.log(Util.format('got %s event on %s:%s from %s', event, repo, ref, remoteAddress));
+                }
+                else {
+                    self.logger.log(Util.format('got %s event on %s from %s', event, repo, remoteAddress));
+                }
+                self.emit('*', event, repo, ref, data);
+                self.emit(repo, event, ref, data);
+                self.emit(repo + ':' + ref, event, data);
+                self.emit(event, repo, ref, data);
+                self.emit(event + ':' + repo, ref, data);
+                self.emit(event + ':' + repo + ':' + ref, data);
+            } else {
+                var type = data.event_name;
+
+                // invalid json
+                if (!type) {
+                    self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
+                    return reply(400, res);
+                }
+
+                self.logger.log(Util.format('got %s event of type %s from %s', event, type, remoteAddress));
+
+                // and now we emit a bunch of data
+                self.emit('*', event, type, data);
+                self.emit(type, event, data);
             }
-            else {
-                self.logger.log(Util.format('got %s event on %s from %s', event, repo, remoteAddress));
-            }
-            self.emit('*', event, repo, ref, data);
-            self.emit(repo, event, ref, data);
-            self.emit(repo + ':' + ref, event, data);
-            self.emit(event, repo, ref, data);
-            self.emit(event + ':' + repo, ref, data);
-            self.emit(event + ':' + repo + ':' + ref, data);
-        } else {
-            var type = data.event_name;
 
-            // invalid json
-            if (!type) {
-                self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
-                return reply(400, res);
-            }
-
-            self.logger.log(Util.format('got %s event of type %s from %s', event, type, remoteAddress));
-
-            // and now we emit a bunch of data
-            self.emit('*', event, type, data);
-            self.emit(type, event, data);
-        }
-
-        reply(200, res);
+            reply(200, res);
+        });
     });
 
     self.logger.log(Util.format(req.method, req.url, remoteAddress));
 
     // 404 if the path is wrong
-    if (url.pathname !== self.path) {
+    if (!self.checkUrl(url)) {
         self.logger.error(Util.format('got invalid path from %s, returning 404', remoteAddress));
         failed = true;
         return reply(404, res);
@@ -185,6 +189,7 @@ var GithubHook = function (options) {
     this.secret = options.secret || false;
     this.logger = options.logger || console;
     this.path = options.path || '/github/callback';
+    this.wildcard = options.wildcard || false;
 
     this.server = Http.createServer(serverHandler.bind(this));
     EventEmitter.call(this);
@@ -207,6 +212,19 @@ GithubHook.prototype.listen = function (callback) {
 };
 
 
+GithubHook.prototype.checkUrl = function (url) {
+
+    if (url.pathname === this.path) {
+        return true;
+    }
+
+    if (this.wildcard && (url.pathname.indexOf(this.path + '/') === 0)) {
+        return true;
+    }
+
+    return false;
+};
+
 GithubHook.prototype.stop = function (callback) {
 
     var self = this;
@@ -222,5 +240,12 @@ GithubHook.prototype.stop = function (callback) {
     });
 };
 
+GithubHook.prototype.getSecret = function (req, next) {
+
+    if (typeof this.secret === 'function') {
+        return this.secret(req, next);
+    }
+    return next(null, this.secret);
+};
 
 module.exports = GithubHook;
