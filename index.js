@@ -38,6 +38,7 @@ function serverHandler(req, res) {
     var buffer = [];
     var bufferLength = 0;
     var failed = false;
+    var isForm = false;
     var remoteAddress = req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress || req.socket.socket.remoteAddress;
 
     req.on('data', function (chunk) {
@@ -67,6 +68,7 @@ function serverHandler(req, res) {
         self.logger.log(Util.format('received %d bytes from %s', bufferLength, remoteAddress));
 
         if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+            isForm = true;
             data = Buffer.concat(buffer, bufferLength).toString();
         } else {
             //this is already a string when sent as JSON
@@ -95,7 +97,7 @@ function serverHandler(req, res) {
                 }
             }
 
-            if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+            if (isForm) {
                 data = Querystring.parse(data).payload;
             }
             data = parse(data);
