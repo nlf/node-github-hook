@@ -76,12 +76,15 @@ function serverHandler(req, res) {
         }
 
         self.getSecret(req, function (err, secret) {
+
             if (err) {
-                self.logger.error('error getting secret for' +  res.url + 'returning 403');
+                self.logger.error(Util.format('error getting secret for %s, returning 403',  res.url));
+                self.logger.error(err.stack);
                 return reply(403, res);
             }
-            var signature = req.headers['x-hub-signature'];
+
             if (secret) {
+                var signature = req.headers['x-hub-signature'];
 
                 if (!signature) {
                     self.logger.error('secret configured, but missing signature, returning 403');
@@ -89,7 +92,7 @@ function serverHandler(req, res) {
                 }
 
                 signature = signature.replace(/^sha1=/, '');
-                var digest = Crypto.createHmac('sha1', self.secret).update(data).digest('hex');
+                var digest = Crypto.createHmac('sha1', secret).update(data).digest('hex');
 
                 if (signature !== digest) {
                     self.logger.error('got invalid signature, returning 403');
