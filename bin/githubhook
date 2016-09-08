@@ -3,6 +3,7 @@
 var child_process = require('child_process'),
   docopt = require('docopt'),
   multiline = require('multiline'),
+  fs = require('fs'),
   path = require('path');
 
 var githubhook = require('../');
@@ -11,7 +12,7 @@ var githubhook = require('../');
 var doc = multiline(function() {/*
 
 Usage:
-  githubhook [--host=HOST] [--port=PORT] [--callback=URL_PATH] [--secret=SECRET] [--verbose] <trigger> <script>
+  githubhook [--host=HOST] [--port=PORT] [--callback=URL_PATH] [--secret=SECRET] [--key=KEY_PATH] [--cert=CERT_PATH] [--verbose] <trigger> <script>
 
 Options:
 
@@ -19,6 +20,8 @@ Options:
   --port=PORT             Port to listen on
   --callback=URL_PATH     The callback URL path
   --secret=SECRET         The secret you use the in the Github webhook config
+  --key=KEY_PATH          Path to read https certificate key file
+  --cert=CERT_PATH        Path to read https certificate file
   --verbose                 Log to console
   --version                 Output the version number
   -h, --help                Output usage information
@@ -33,14 +36,22 @@ var options = docopt.docopt(doc, {
   exit: true
 });
 
-
-var github = githubhook({
+var githubhookConfig = {
   host: options['--host'],
   port: options['--port'] ? parseInt(options['--port']) : null,
   path: options['--callback'],
   secret: options['--secret'],
-  logger: options['--verbose'] ? console : null,
-});
+  logger: options['--verbose'] ? console : null
+};
+
+if (options['--cert']) {
+  githubhookConfig.https = {
+    key: fs.readFileSync(options['--key']),
+    cert: fs.readFileSync(options['--cert'])
+  }
+}
+
+var github = githubhook(githubhookConfig);
 
 // start it!
 github.listen();
@@ -64,4 +75,3 @@ github.on(options['<trigger>'], function () {
     }
   });
 });
-

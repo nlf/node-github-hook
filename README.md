@@ -59,12 +59,13 @@ Available options are:
 * **wildcard**: if true, the path for the GitHub callback will be considered valid as long as it *starts* with the configured path
 * **secret**: if specified, you must use the same secret in your webhook configuration in GitHub. if a secret is specified, but one is not configured in GitHub, the hook will fail. if a secret is *not* specified, but one *is* configured in GitHub, the signature will not be validated and will be assumed to be correct. consider yourself warned. this option can also be a function that takes the following parameters: (request, data, callback). callback is error first and should be passed (err, secret)
 * **logger**: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is `console`.
+* **https**: Options to pass to nodejs https server. If specified, you must follow documentation about nodejs https library (See options in https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener)
 
 
 Command-line
 -------------
 
-You can use the command-line client to execute a shell script when a particular 
+You can use the command-line client to execute a shell script when a particular
 event occurs.
 
 Install it globally:
@@ -87,6 +88,8 @@ Options:
   --port=PORT             Port to listen on
   --callback=URL_PATH     The callback URL path
   --secret=SECRET         The secret you use the in the GitHub webhook config
+  --key=KEY_PATH          Path to read https certificate key file
+  --cert=CERT_PATH        Path to read https certificate file
   --verbose               Log to console
   --version               Output the version number
   -h, --help              Output usage information

@@ -1,4 +1,5 @@
 var Http = require('http');
+var Https = require('https');
 var Url = require('url');
 var Querystring = require('querystring');
 var EventEmitter = require('events').EventEmitter;
@@ -197,7 +198,13 @@ var GithubHook = function (options) {
     this.path = options.path || '/github/callback';
     this.wildcard = options.wildcard || false;
 
-    this.server = Http.createServer(serverHandler.bind(this));
+    if (options.https) {
+      this.server = Https.createServer(options.https, serverHandler.bind(this));
+    }
+    else {
+      this.server = Http.createServer(serverHandler.bind(this));
+    }
+
     EventEmitter.call(this);
 };
 
