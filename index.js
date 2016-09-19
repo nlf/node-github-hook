@@ -40,7 +40,11 @@ function serverHandler(req, res) {
     var bufferLength = 0;
     var failed = false;
     var isForm = false;
-    var remoteAddress = req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress || req.socket.socket.remoteAddress;
+    var remoteAddress;
+    if (this.options.trustProxy !== false) {
+      remoteAddress = req.headers['x-forwarded-for'];
+    }
+    remoteAddress = remoteAddress || req.ip || req.socket.remoteAddress || req.socket.socket.remoteAddress;
 
     req.on('data', function (chunk) {
 
@@ -114,7 +118,7 @@ function serverHandler(req, res) {
             }
 
             data.request = req;
-            var event = req.headers['x-github-event'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
+            var event = req.headers['x-github-event'] || req.headers['x-event-key'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
 
             // handle GitLab system hook
             if (event !== 'system'){
@@ -176,9 +180,9 @@ function serverHandler(req, res) {
         return reply(405, res);
     }
 
-    // 400 if it's not a github or gitlab event
-    if (!req.headers.hasOwnProperty('x-github-event') && !req.headers.hasOwnProperty('x-gitlab-event')) {
-        self.logger.error(Util.format('missing x-github-event or x-gitlab-event header from %s, returning 400', remoteAddress));
+    // 400 if it's not a github, gitlab, or bitbucket event
+    if (!req.headers.hasOwnProperty('x-github-event') && !req.headers.hasOwnProperty('x-gitlab-event') && !req.headers.hasOwnProperty('x-event-key')) {
+        self.logger.error(Util.format('missing x-github-event, x-gitlab-event, or x-event-key header from %s, returning 400', remoteAddress));
         failed = true;
         return reply(400, res);
     }
@@ -216,7 +220,7 @@ GithubHook.prototype.listen = function (callback) {
 
     self.server.listen(self.port, self.host, function () {
 
-        self.logger.log(Util.format('listening for github events on %s:%d', self.host, self.port));
+        self.logger.log(Util.format('listening for hook events on %s:%d', self.host, self.port));
 
         if (typeof callback === 'function') {
             callback();

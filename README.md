@@ -60,6 +60,7 @@ Available options are:
 * **secret**: if specified, you must use the same secret in your webhook configuration in GitHub. if a secret is specified, but one is not configured in GitHub, the hook will fail. if a secret is *not* specified, but one *is* configured in GitHub, the signature will not be validated and will be assumed to be correct. consider yourself warned. this option can also be a function that takes the following parameters: (request, data, callback). callback is error first and should be passed (err, secret)
 * **logger**: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is `console`.
 * **https**: Options to pass to nodejs https server. If specified, you must follow documentation about nodejs https library (See options in https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener)
+* **trustProxy**: By default the `x-forwarded-for` header is trusted when determining the remoteAddress to log for a request. Set this to `false` to disable this behavior
 
 
 Command-line
