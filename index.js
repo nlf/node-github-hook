@@ -41,7 +41,7 @@ function serverHandler(req, res) {
     var failed = false;
     var isForm = false;
     var remoteAddress;
-    if (this.options.trustProxy !== false) {
+    if (this.trustProxy !== false) {
       remoteAddress = req.headers['x-forwarded-for'];
     }
     remoteAddress = remoteAddress || req.ip || req.socket.remoteAddress || req.socket.socket.remoteAddress;
@@ -201,6 +201,7 @@ var GithubHook = function (options) {
     this.logger = options.logger || console;
     this.path = options.path || '/github/callback';
     this.wildcard = options.wildcard || false;
+    this.trustProxy = options.trustProxy || false;
 
     if (options.https) {
       this.server = Https.createServer(options.https, serverHandler.bind(this));
