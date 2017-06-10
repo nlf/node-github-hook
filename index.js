@@ -118,7 +118,7 @@ function serverHandler(req, res) {
             }
 
             data.request = req;
-            var event = req.headers['x-github-event'] || req.headers['x-event-key'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
+            var event = req.headers['x-github-event'] || req.headers['X-Gogs-Event'] || req.headers['x-event-key'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
 
             // handle GitLab system hook
             if (event !== 'system'){
@@ -181,8 +181,8 @@ function serverHandler(req, res) {
     }
 
     // 400 if it's not a github, gitlab, or bitbucket event
-    if (!req.headers.hasOwnProperty('x-github-event') && !req.headers.hasOwnProperty('x-gitlab-event') && !req.headers.hasOwnProperty('x-event-key')) {
-        self.logger.error(Util.format('missing x-github-event, x-gitlab-event, or x-event-key header from %s, returning 400', remoteAddress));
+    if (!req.headers.hasOwnProperty('x-github-event') && !req.headers.hasOwnProperty('x-gitlab-event') && !req.headers.hasOwnProperty('x-gogs-event') && !req.headers.hasOwnProperty('x-event-key')) {
+        self.logger.error(Util.format('missing x-github-event, x-gitlab-event, x-gogs-event, or x-event-key header from %s, returning 400', remoteAddress));
         failed = true;
         return reply(400, res);
     }
