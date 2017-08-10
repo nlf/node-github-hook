@@ -118,7 +118,7 @@ function serverHandler(req, res) {
             }
 
             data.request = req;
-            var event = req.headers['x-github-event'] || req.headers['X-Gogs-Event'] || req.headers['x-event-key'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
+            var event = req.headers['x-github-event'] || req.headers['x-gogs-event'] || req.headers['x-event-key'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
 
             // handle GitLab system hook
             if (event !== 'system'){
