@@ -62,6 +62,7 @@ Available options are:
 * **https**: Options to pass to nodejs https server. If specified, you must follow documentation about nodejs https library (See options in https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener)
 * **trustProxy**: By default the `x-forwarded-for` header is trusted when determining the remoteAddress to log for a request. Set this to `false` to disable this behavior
 * **enableHealthcheck**: Respond to GET requests with a 204 response for healthcheck purposes
+* **healthcheckCode**: Override the 204 status code for healthchecks (for systems that aren't friendly with HTTP spec compliance and want a 200, for example)
 
 
 Command-line

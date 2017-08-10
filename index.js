@@ -178,7 +178,7 @@ function serverHandler(req, res) {
     // stop processing any further incoming request data
     if (req.method === 'GET' && this.enableHealthcheck) {
         failed = true;
-        return reply(204, res);
+        return reply(this.healthcheckCode, res);
     }
 
     // 405 if the method is wrong
@@ -211,6 +211,7 @@ var GithubHook = function (options) {
     this.wildcard = options.wildcard || false;
     this.trustProxy = options.trustProxy || false;
     this.enableHealthcheck = options.enableHealthcheck || false;
+    this.healthcheckCode = options.healthcheckCode || 204;
 
     if (options.https) {
       this.server = Https.createServer(options.https, serverHandler.bind(this));
