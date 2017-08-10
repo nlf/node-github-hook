@@ -61,6 +61,7 @@ Available options are:
 * **logger**: an optional instance of a logger that supports the "log" and "error" methods and one parameter for data (like console), default is `console`.
 * **https**: Options to pass to nodejs https server. If specified, you must follow documentation about nodejs https library (See options in https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener)
 * **trustProxy**: By default the `x-forwarded-for` header is trusted when determining the remoteAddress to log for a request. Set this to `false` to disable this behavior
+* **enableHealthcheck**: Respond to GET requests with a 204 response for healthcheck purposes
 
 
 Command-line

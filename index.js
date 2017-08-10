@@ -173,6 +173,14 @@ function serverHandler(req, res) {
         return reply(404, res);
     }
 
+    // 204 if healthchecks are enabled and it's a GET
+    // note that we flag the request as failed only to
+    // stop processing any further incoming request data
+    if (req.method === 'GET' && this.enableHealthcheck) {
+        failed = true;
+        return reply(204, res);
+    }
+
     // 405 if the method is wrong
     if (req.method !== 'POST') {
         self.logger.error(Util.format('got invalid method from %s, returning 405', remoteAddress));
@@ -202,6 +210,7 @@ var GithubHook = function (options) {
     this.path = options.path || '/github/callback';
     this.wildcard = options.wildcard || false;
     this.trustProxy = options.trustProxy || false;
+    this.enableHealthcheck = options.enableHealthcheck || false;
 
     if (options.https) {
       this.server = Https.createServer(options.https, serverHandler.bind(this));
