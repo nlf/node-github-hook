@@ -71,6 +71,11 @@ function serverHandler(req, res) {
 
 
         self.logger.log(Util.format('received %d bytes from %s', bufferLength, remoteAddress));
+        var event = req.headers['x-github-event'] || req.headers['x-gogs-event'] || req.headers['x-event-key'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
+        if (event === 'ping') {
+            self.emit(event, null, null, data);
+            return reply(200, res);
+        }
 
         if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
             isForm = true;
@@ -118,11 +123,7 @@ function serverHandler(req, res) {
             }
 
             data.request = req;
-            var event = req.headers['x-github-event'] || req.headers['x-gogs-event'] || req.headers['x-event-key'] || (req.headers['x-gitlab-event'] ? req.headers['x-gitlab-event'].split(' ')[0].toLowerCase() : 'unknown');
 
-	    if (event === 'ping') {
-		self.emit(event, null, null, data);
-	    } else
             // handle GitLab system hook
             if (event !== 'system'){
                 // invalid json
