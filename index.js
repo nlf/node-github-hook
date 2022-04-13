@@ -94,19 +94,36 @@ function serverHandler(req, res) {
             }
 
             if (secret) {
-                var signature = req.headers['x-hub-signature'];
-
-                if (!signature) {
-                    self.logger.error('secret configured, but missing signature, returning 403');
-                    return reply(403, res);
+                // Azure repos only support basic auth
+                if (req.headers.hasOwnProperty('authorization')) {
+                    var authString = req.headers.authorization || ''
+                    var token = authString.split(/\s+/).pop() || '';
+                    var auth = Buffer.from(token, 'base64').toString();
+                    var parts = auth.split(/:/);
+                    var password = parts[1];
+                    
+                    // Match extracted basic auth password with configured secret 
+                    if (password != secret) {
+                        self.logger.error('authorization password do not match secret, returning 403');
+                        return reply(403, res);
+                    }
                 }
 
-                signature = signature.replace(/^sha1=/, '');
-                var digest = Crypto.createHmac('sha1', secret).update(data).digest('hex');
+                else {
+                    var signature = req.headers['x-hub-signature'];
 
-                if (signature !== digest) {
-                    self.logger.error('got invalid signature, returning 403');
-                    return reply(403, res);
+                    if (!signature) {
+                        self.logger.error('secret configured, but missing signature, returning 403');
+                        return reply(403, res);
+                    }
+
+                    signature = signature.replace(/^sha1=/, '');
+                    var digest = Crypto.createHmac('sha1', secret).update(data).digest('hex');
+
+                    if (signature !== digest) {
+                        self.logger.error('got invalid signature, returning 403');
+                        return reply(403, res);
+                    }
                 }
             }
 
@@ -114,7 +131,6 @@ function serverHandler(req, res) {
                 data = Querystring.parse(data).payload;
             }
             data = parse(data);
-
 
             // invalid json
             if (!data) {
@@ -124,8 +140,42 @@ function serverHandler(req, res) {
 
             data.request = req;
 
+            // handle Azure
+            if (data.request.headers.hasOwnProperty('x-vss-activityid')) {
+                // invalid json
+                if (!data.resource.repository || !data.resource.repository.name) {
+                    self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
+                    return reply(400, res);
+                }
+
+                event = data.eventType.replace("git.", "");
+
+                var repo = data.resource.repository.name;
+                var ref = data.resource.refUpdates[0].name;
+
+                data.repository = data.resource.repository;
+                data.before = data.resource.refUpdates[0].oldObjectId;
+                data.after = data.resource.refUpdates[0].newObjectId;
+                data.created = data.resource.refUpdates[0].oldObjectId == "0000000000000000000000000000000000000000" ? true : false;
+                data.deleted = data.resource.refUpdates[0].newObjectId == "0000000000000000000000000000000000000000" ? true : false;
+                
+                // and now we emit a bunch of data
+                if (ref) {
+                    self.logger.log(Util.format('got %s event on %s:%s from %s', event, repo, ref, remoteAddress));
+                }
+                else {
+                    self.logger.log(Util.format('got %s event on %s from %s', event, repo, remoteAddress));
+                }
+                self.emit('*', event, repo, ref, data);
+                self.emit(repo, event, ref, data);
+                self.emit(repo + ':' + ref, event, data);
+                self.emit(event, repo, ref, data);
+                self.emit(event + ':' + repo, ref, data);
+                self.emit(event + ':' + repo + ':' + ref, data);
+            }
+
             // handle GitLab system hook
-            if (event !== 'system'){
+            else if (event !== 'system'){
                 // invalid json
                 if (!data.repository || !data.repository.name) {
                     self.logger.error(Util.format('received incomplete data from %s, returning 400', remoteAddress));
@@ -192,9 +242,9 @@ function serverHandler(req, res) {
         return reply(405, res);
     }
 
-    // 400 if it's not a github, gitlab, or bitbucket event
-    if (!req.headers.hasOwnProperty('x-github-event') && !req.headers.hasOwnProperty('x-gitlab-event') && !req.headers.hasOwnProperty('x-gogs-event') && !req.headers.hasOwnProperty('x-event-key')) {
-        self.logger.error(Util.format('missing x-github-event, x-gitlab-event, x-gogs-event, or x-event-key header from %s, returning 400', remoteAddress));
+    // 400 if it's not a repos, github, gitlab, or bitbucket event
+    if (!req.headers.hasOwnProperty('x-vss-activityid') && !req.headers.hasOwnProperty('x-github-event') && !req.headers.hasOwnProperty('x-gitlab-event') && !req.headers.hasOwnProperty('x-gogs-event') && !req.headers.hasOwnProperty('x-event-key')) {
+        self.logger.error(Util.format('missing x-vss-activityid, x-github-event, x-gitlab-event, x-gogs-event, or x-event-key header from %s, returning 400', remoteAddress));
         failed = true;
         return reply(400, res);
     }
